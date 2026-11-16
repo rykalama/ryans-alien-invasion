@@ -7,7 +7,7 @@ from bullet import Bullet
 from alien import Alien
 
 
-def check_keydown_events(event, ai_settings, screen, ship, bullets):
+def check_keydown_events(event, ai_settings, screen, stats, ship, bullets):
     """Respond to keypresses."""
     if event.key == pygame.K_RIGHT:
         ship.moving_right = True
@@ -17,6 +17,8 @@ def check_keydown_events(event, ai_settings, screen, ship, bullets):
         fire_bullet(ai_settings, screen, ship, bullets)
     elif event.key == pygame.K_q:
         sys.exit()
+    elif event.key == pygame.K_p and stats.game_active:
+        stats.game_paused = not stats.game_paused
 
 
 def check_keyup_events(event, ship):
@@ -33,7 +35,7 @@ def check_events(ai_settings, screen, stats, sb, play_button, ship, aliens, bull
         if event.type == pygame.QUIT:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            check_keydown_events(event, ai_settings, screen, ship, bullets)
+            check_keydown_events(event, ai_settings, screen, stats, ship, bullets)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -67,6 +69,7 @@ def check_play_button(
         # Reset the game statistics.
         stats.reset_stats()
         stats.game_active = True
+        stats.game_paused = False
 
         # Reset the scoreboard images.
         sb.prep_score()
@@ -108,6 +111,11 @@ def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_bu
     # Draw the play button if the game is inactive.
     if not stats.game_active:
         play_button.draw_button()
+    elif stats.game_paused:
+        paused_font = pygame.font.SysFont(None, 72)
+        paused_image = paused_font.render("PAUSED", True, (30, 30, 30))
+        paused_rect = paused_image.get_rect(center=screen.get_rect().center)
+        screen.blit(paused_image, paused_rect)
 
     # Make the most recently drawn screen visible.
     pygame.display.flip()
